@@ -8,10 +8,10 @@ const instance = axios.create({
 
 const send_ans = async (ans) => {
   const {
-    data: { answer }
+    data: { score }
   } = await instance.post('/checkAns', { params: { ans } })
-  console.log(answer)
-  return answer
+  console.log(score)
+  return score
 }
 
 class Question extends Component {
@@ -34,8 +34,16 @@ class Question extends Component {
     //console.log("next")
     if(this.state.current_question+1 === this.state.contents.length)
     {
+      var my_score = 0
       console.log("show answer")
-      send_ans(this.state.ans)
+      send_ans(this.state.ans).then(function(result)
+      {
+        console.log(result)
+        my_score = result
+      }
+      )
+      this.setState({score: my_score})
+      //console.log(this.state.score)
       // const action = send_ans(this.state.ans)
       // action.then(function(result)
       // {
