@@ -18,17 +18,58 @@ class Question extends Component {
     }
   }
 
-  next = () => {
+  next = async () => {
     // TODO : switch to the next question,
     // and check answers to set the score after you finished the last question    
+    //console.log("next")
+    if(this.state.current_question+1 === this.state.contents.length)
+    {
+      //console.log("show answer")
+      const {
+        data: { ans }
+      } = await instance.post('/checkAns')
+      console.log(ans)
+      return ans
+    }
+    else
+    {
+      this.setState({current_question: this.state.current_question+1})
+    }
   }
 
-  choose = () => {
+  choose = (index) => {
     // TODO : update 'ans' for the option you clicked
+    //console.log("choose")
+    //console.log(index['target']['id'].split('_')[1])
+    var selection = parseInt(index['target']['id'].split('_')[1])
+    console.log(selection)
+    var new_ans = this.state.ans
+    if(this.state.current_question+1 === new_ans.length)
+    {
+      new_ans.pop()
+    }
+    new_ans.push(selection)
+    console.log(new_ans)
+    this.setState({ans: new_ans})
   }
 
-  getQuestions = () => {
+  getQuestions = async () => {
     // TODO : get questions from backend
+    const {
+      data: { contents }
+    } = await instance.get('/getContents')
+    //console.log(contents)
+    var question_box = contents
+    // for(var i=0; i < contents.length; i++)
+    // {
+    //   //console.log(contents[i]['questionID'])
+    //   //console.log(contents[i]['question'])
+    //   question_box.push(contents[i]['question'])
+    // }
+    this.setState({contents: question_box})
+    this.setState({current_question: 0})
+    console.log(this.state.contents)
+    console.log(this.state.current_question)
   }
 
   componentDidMount() {
@@ -37,27 +78,47 @@ class Question extends Component {
 
   // TODO : fill in the rendering contents and logic
   render() {
-    const contents = this.state.contents
-    const current = this.state.current_question
+    const question_contents = this.state.contents
+    const current_id = this.state.current_question
     const score = this.state.score
     const ans = this.state.ans
+    var options = []
+    //console.log(question_contents)
 
+    //for(var i=0; i < question_contents[current_id]['options'].length;i++)
+    if(question_contents.length !== 0)
+    {
+      for(var i=0; i < question_contents[current_id]['options'].length;i++)
+      {
+        var the_id = 'q' + (current_id+1) + '_' + (i+1)
+        console.log(the_id)
+        options.push(
+        <div className="each-option">
+        <input type="radio" id={the_id} onClick={this.choose} value={the_id}/>
+        <span>{question_contents[current_id]['options'][i]}</span>
+        </div>)
+      }
+    }
+    
+    
+    
+    //console.log(question_contents)
     return (
       <div id="quiz-container">
-        {contents.length ?
+        {question_contents.length ?
           <React.Fragment>
             <div id="question-box">
               <div className="question-box-inner">
-
+              Question {current_id+1} of {question_contents.length}
               </div>
             </div>
 
             <div id="question-title">
-              
+            {question_contents[current_id]['question']}
             </div>
 
             <div id="options">
-              
+            {options}
             </div>
             
             <div id="actions" onClick={this.next}>
