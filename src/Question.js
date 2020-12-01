@@ -6,6 +6,14 @@ const instance = axios.create({
   baseURL: API_ROOT
 })
 
+const send_ans = async (ans) => {
+  const {
+    data: { answer }
+  } = await instance.post('/checkAns', { params: { ans } })
+  console.log(answer)
+  return answer
+}
+
 class Question extends Component {
   constructor(props) {
     super(props)
@@ -18,18 +26,21 @@ class Question extends Component {
     }
   }
 
+  
+
   next = async () => {
     // TODO : switch to the next question,
     // and check answers to set the score after you finished the last question    
     //console.log("next")
     if(this.state.current_question+1 === this.state.contents.length)
     {
-      //console.log("show answer")
-      const {
-        data: { ans }
-      } = await instance.post('/checkAns')
-      console.log(ans)
-      return ans
+      console.log("show answer")
+      send_ans(this.state.ans)
+      // const action = send_ans(this.state.ans)
+      // action.then(function(result)
+      // {
+      //   console.log(result)
+      // })
     }
     else
     {
@@ -94,7 +105,10 @@ class Question extends Component {
         console.log(the_id)
         options.push(
         <div className="each-option">
-        <input type="radio" id={the_id} onClick={this.choose} value={the_id}/>
+        {ans[current_id]===(i+1) ? 
+        <input type="radio" id={the_id} onClick={this.choose} value=''/> 
+        :<input type="radio" id={the_id} onClick={this.choose} value=''/> 
+        }
         <span>{question_contents[current_id]['options'][i]}</span>
         </div>)
       }
